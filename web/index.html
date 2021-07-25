@@ -59,6 +59,10 @@
             },
             error: function () {
                 alert("An error occurred.");
+                $("#check").removeAttr('disabled');
+                $("#output").removeAttr('disabled');
+                $("#users").removeAttr('disabled');
+                $("#sid").removeAttr('disabled');
             },
             complete: function () {
             }
