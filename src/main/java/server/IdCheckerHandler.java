@@ -26,7 +26,6 @@ public class IdCheckerHandler extends HttpServlet {
             String content = Crawler.getContentFromUrl(QUERY + URLEncoder.encode(user, "UTF-8"), new HashMap<>() {{
                 put("cookie", "_admin_session=" + sessionId);
             }}, "GET", null, null);
-
             String html = new JSONObject(content).getString("html");
 
             try {
@@ -52,39 +51,48 @@ public class IdCheckerHandler extends HttpServlet {
                 o.put("email", "null");
             }
 
-            try {
+            if (username != null) {
                 content = Crawler.getContentFromUrl(PROFILE.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
                     put("cookie", "_admin_session=" + sessionId);
                 }}, "GET", null, null);
                 html = new JSONObject(content).getString("html");
-                Document doc = Jsoup.parse(html);
-                String mlmEnabled = doc.selectFirst(".row-mlm_enabled td inline-boolean-attr").attr("attr-value");
-                o.put("mlmEnabled", mlmEnabled == null ? "null" : mlmEnabled);
-                String mlmCertificated = doc.selectFirst(".row-mlm_certificated td span").text();
-                o.put("mlmCertificated", mlmCertificated == null ? "null" : mlmCertificated);
-            } catch (Exception e) {
+                try {
+                    Document doc = Jsoup.parse(html);
+                    String mlmEnabled = doc.selectFirst(".row-mlm_enabled td inline-boolean-attr").attr("attr-value");
+                    o.put("mlmEnabled", mlmEnabled == null ? "null" : mlmEnabled);
+                    String mlmCertificated = doc.selectFirst(".row-mlm_certificated td span").text();
+                    o.put("mlmCertificated", mlmCertificated == null ? "null" : mlmCertificated);
+                } catch (Exception e) {
+                    o.put("mlmEnabled", "null");
+                    o.put("mlmCertificated", "null");
+                }
+            } else {
                 o.put("mlmEnabled", "null");
                 o.put("mlmCertificated", "null");
             }
 
-            try {
+            if (username != null) {
+
                 content = Crawler.getContentFromUrl(REFERRALS.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
                     put("cookie", "_admin_session=" + sessionId);
                 }}, "GET", null, null);
                 html = new JSONObject(content).getString("html");
-
-                String referrals = "0";
-                if (html.contains("downline referral")) {
-                    referrals = TParser.getContent(html, "View ", " downline referral");
+                try {
+                    String referrals = "0";
+                    if (html.contains("downline referral")) {
+                        referrals = TParser.getContent(html, "View ", " downline referral");
+                    }
+                    o.put("referrals", referrals == null ? "null" : referrals);
+                } catch (Exception e) {
+                    o.put("referrals", "null");
                 }
-                o.put("referrals", referrals == null ? "null" : referrals);
-            } catch (Exception e) {
+            } else {
                 o.put("referrals", "null");
             }
             return o;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
