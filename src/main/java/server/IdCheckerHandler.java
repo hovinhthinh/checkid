@@ -29,40 +29,58 @@ public class IdCheckerHandler extends HttpServlet {
 
             String html = new JSONObject(content).getString("html");
 
-            String id = TParser.getContent(html, "<user-status-control user-id='", "'");
-            o.put("id", id);
-
-            String username = TParser.getContent(html, "<a href=\"/adminjk/users/", "\"");
-            o.put("user", username);
-
-            Document doc = Jsoup.parse(html);
-            String email = doc.select("tbody>tr>td>span").get(1).text();
-            o.put("email", email);
-
-            content = Crawler.getContentFromUrl(PROFILE.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
-                put("cookie", "_admin_session=" + sessionId);
-            }}, "GET", null, null);
-            html = new JSONObject(content).getString("html");
-
-            doc = Jsoup.parse(html);
-
-            String mlmEnabled = doc.selectFirst(".row-mlm_enabled td inline-boolean-attr").attr("attr-value");
-            o.put("mlmEnabled", mlmEnabled);
-
-            String mlmCertificated = doc.selectFirst(".row-mlm_certificated td span").text();
-            o.put("mlmCertificated", mlmCertificated);
-
-            content = Crawler.getContentFromUrl(REFERRALS.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
-                put("cookie", "_admin_session=" + sessionId);
-            }}, "GET", null, null);
-            html = new JSONObject(content).getString("html");
-
-            String referrals = "0";
-            if (html.contains("downline referral")) {
-                referrals = TParser.getContent(html, "View ", " downline referral");
+            try {
+                String id = TParser.getContent(html, "<user-status-control user-id='", "'");
+                o.put("id", id == null ? "null" : id);
+            } catch (Exception e) {
+                o.put("id", "null");
             }
-            o.put("referrals", referrals);
 
+            String username = null;
+            try {
+                username = TParser.getContent(html, "<a href=\"/adminjk/users/", "\"");
+                o.put("user", username == null ? "null" : username);
+            } catch (Exception e) {
+                o.put("user", "null");
+            }
+
+            try {
+                Document doc = Jsoup.parse(html);
+                String email = doc.select("tbody>tr>td>span").get(1).text();
+                o.put("email", email == null ? "null" : email);
+            } catch (Exception e) {
+                o.put("email", "null");
+            }
+
+            try {
+                content = Crawler.getContentFromUrl(PROFILE.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
+                    put("cookie", "_admin_session=" + sessionId);
+                }}, "GET", null, null);
+                html = new JSONObject(content).getString("html");
+                Document doc = Jsoup.parse(html);
+                String mlmEnabled = doc.selectFirst(".row-mlm_enabled td inline-boolean-attr").attr("attr-value");
+                o.put("mlmEnabled", mlmEnabled == null ? "null" : mlmEnabled);
+                String mlmCertificated = doc.selectFirst(".row-mlm_certificated td span").text();
+                o.put("mlmCertificated", mlmCertificated == null ? "null" : mlmCertificated);
+            } catch (Exception e) {
+                o.put("mlmEnabled", "null");
+                o.put("mlmCertificated", "null");
+            }
+
+            try {
+                content = Crawler.getContentFromUrl(REFERRALS.replace("{USER}", URLEncoder.encode(username, "UTF-8")), new HashMap<>() {{
+                    put("cookie", "_admin_session=" + sessionId);
+                }}, "GET", null, null);
+                html = new JSONObject(content).getString("html");
+
+                String referrals = "0";
+                if (html.contains("downline referral")) {
+                    referrals = TParser.getContent(html, "View ", " downline referral");
+                }
+                o.put("referrals", referrals == null ? "null" : referrals);
+            } catch (Exception e) {
+                o.put("referrals", "null");
+            }
             return o;
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,7 +99,6 @@ public class IdCheckerHandler extends HttpServlet {
         String user = request.getParameter("user");
         String sid = request.getParameter("sid");
         JSONObject o = check(user, sid);
-
         httpServletResponse.getWriter().print(o.toString());
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
     }
