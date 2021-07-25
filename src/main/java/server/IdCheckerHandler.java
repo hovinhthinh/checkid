@@ -21,6 +21,7 @@ public class IdCheckerHandler extends HttpServlet {
 
     static JSONObject check(String user, String sessionId) {
         System.out.println("Checking: " + user);
+        user = user.replaceAll("\\s", "");
         try {
             JSONObject o = new JSONObject();
             String content = Crawler.getContentFromUrl(QUERY + URLEncoder.encode(user, "UTF-8"), new HashMap<>() {{
