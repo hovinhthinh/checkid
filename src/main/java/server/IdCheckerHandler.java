@@ -80,15 +80,15 @@ public class IdCheckerHandler extends HttpServlet {
                 html = new JSONObject(content).getString("html");
                 try {
                     String referrals = "0";
-                    if (html.contains("downline referral")) {
-                        referrals = TParser.getContent(html, "View ", " downline referral");
+                    if (html.contains("downline referee")) {
+                        referrals = TParser.getContent(html, "View ", " downline referee");
                     }
-                    o.put("referrals", referrals == null ? "null" : referrals);
+                    o.put("referees", referrals == null ? "null" : referrals);
                 } catch (Exception e) {
-                    o.put("referrals", "null");
+                    o.put("referees", "null");
                 }
             } else {
-                o.put("referrals", "null");
+                o.put("referees", "null");
             }
             return o;
         } catch (Exception e) {
