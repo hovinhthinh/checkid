@@ -53,7 +53,7 @@
             contentType: 'application/json; charset=utf-8',
             dataType: "json",
             success: function (data) {
-                let text = `${data.id}\t${data.user}\t${data.email}\t${data.mlmEnabled}\t${data.mlmCertificated}\t${data.referrals}`;
+                let text = `${data.id}\t${data.user}\t${data.email}\t${data.mlmEnabled}\t${data.mlmCertificated}\t${data.referees}`;
                 $('#output').val($('#output').val() + (index == 0 ? "" : "\n") + text);
                 checkIndividual(users, index + 1);
             },
@@ -72,7 +72,7 @@
 
     function check() {
         let users = $('#users').val().trim().split("\n");
-        $("#output").val("id\tusername\temail\tmlmEnabled\tmlmCertificated\treferrals\n");
+        $("#output").val("id\tusername\temail\tmlmEnabled\tmlmCertificated\treferees\n");
         $("#check").attr('disabled', 'disabled');
         $("#output").attr('disabled', 'disabled');
         $("#users").attr('disabled', 'disabled');
